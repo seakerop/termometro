@@ -1,0 +1,19 @@
+{
+  "name": "termometro-sp500",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Qué dicen los indicadores más usados en inversión sobre la rentabilidad futura del S&P 500 y de Bitcoin",
+  "scripts": {
+    "descargar": "node src/descargar.mjs && node src/descargar_btc.mjs",
+    "analizar": "node src/analisis.mjs",
+    "analizar:btc": "node src/analisis_btc.mjs",
+    "informe": "node src/textos/plantilla_en.mjs && node src/informe.mjs sp500 && node src/informe.mjs btc && node src/informe.mjs sp500 en && node src/informe.mjs btc en",
+    "todo": "npm run descargar && npm run analizar && npm run analizar:btc && npm run corto && npm run informe",
+    "test": "node --test src/pruebas.test.mjs",
+    "corto": "node src/corto.mjs sp500 && node src/corto.mjs btc && node src/epocas.mjs sp500 && node src/epocas.mjs btc"
+  },
+  "dependencies": {
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+  }
+}

@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{titulo}}</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Crect x=%226%22 y=%221%22 width=%224%22 height=%2210%22 rx=%222%22 fill=%22%232a78d6%22/%3E%3Ccircle cx=%228%22 cy=%2212%22 r=%223.5%22 fill=%22%232a78d6%22/%3E%3C/svg%3E">
+<meta name="description" content="{{descripcion}}">
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb;
+  --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10);
+  --pos: #2a78d6; --neg: #e34948; --mid: #f0efec; --dot: #2a78d6; --hoy: #eb6834;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19;
+    --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
+    --pos: #3987e5; --neg: #e66767; --mid: #383835; --dot: #3987e5; --hoy: #d95926;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19;
+  --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
+  --pos: #3987e5; --neg: #e66767; --mid: #383835; --dot: #3987e5; --hoy: #d95926;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink); font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+main { max-width: 1040px; margin: 0 auto; padding: 32px 16px 80px; }
+nav { position: sticky; top: 0; z-index: 5; background: var(--page); border-bottom: 1px solid var(--border); }
+nav div { max-width: 1040px; margin: 0 auto; padding: 8px 16px; display: flex; gap: 16px; overflow-x: auto; white-space: nowrap; font-size: 14px; }
+nav a { color: var(--ink-2); text-decoration: none; }
+nav a:hover { color: var(--ink); }
+h1 { font-size: 30px; line-height: 1.2; margin: 0 0 8px; }
+h2 { font-size: 22px; margin: 56px 0 8px; scroll-margin-top: 48px; }
+h3 { font-size: 17px; margin: 24px 0 8px; }
+p { margin: 0 0 12px; max-width: 74ch; }
+a { color: var(--pos); }
+.sub { color: var(--ink-2); margin-bottom: 24px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin: 16px 0; }
+.lead p { font-size: 17px; }
+.note { color: var(--ink-2); font-size: 14px; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.hallazgo { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+.hallazgo h3 { margin: 0 0 6px; font-size: 16px; }
+.hallazgo p { font-size: 15px; margin-bottom: 8px; }
+.hallazgo .cifra { font-size: 28px; font-weight: 600; line-height: 1.2; margin: 4px 0 6px; }
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
+.tabs button { font: inherit; font-size: 14px; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--ink); cursor: pointer; }
+.tabs button[aria-pressed="true"] { background: var(--ink); color: var(--page); border-color: var(--ink); }
+select { font: inherit; font-size: 15px; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--ink); max-width: 100%; }
+.scroll { overflow-x: auto; }
+svg { display: block; }
+#nubeSvg, #serieSvg { min-width: 640px; }
+svg text { fill: var(--ink-2); font-size: 12px; font-variant-numeric: tabular-nums; }
+svg .val { fill: var(--ink); font-size: 12.5px; }
+svg .title { fill: var(--ink); font-size: 13px; font-weight: 600; }
+svg .fam { fill: var(--ink); font-size: 12px; font-weight: 600; }
+.multiples { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 16px; }
+.legend { display: flex; gap: 18px; flex-wrap: wrap; font-size: 13px; color: var(--ink-2); margin-top: 10px; }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; font-variant-numeric: tabular-nums; }
+th, td { padding: 7px 8px; border-bottom: 1px solid var(--grid); text-align: right; vertical-align: top; white-space: nowrap; }
+td:first-child, td.l { white-space: normal; }
+th:first-child, td:first-child { text-align: left; }
+th { color: var(--ink-2); font-weight: 600; white-space: nowrap; }
+td.l, th.l { text-align: left; }
+.chip { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--border); white-space: nowrap; }
+.chip.solida { background: var(--ink); color: var(--page); border-color: var(--ink); }
+.chip.indicio { border-color: var(--ink-2); color: var(--ink); }
+.chip.nada { color: var(--muted); }
+details summary { cursor: pointer; color: var(--ink-2); font-size: 14px; margin-top: 10px; }
+#tip { position: fixed; pointer-events: none; background: var(--surface); color: var(--ink); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 13px; line-height: 1.45; box-shadow: 0 4px 16px rgba(0,0,0,.14); opacity: 0; transition: opacity .1s; max-width: 300px; z-index: 20; }
+#tip b { font-weight: 600; }
+ul { padding-left: 20px; max-width: 74ch; }
+li { margin-bottom: 8px; }
+.ficha-cab { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.kv { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; font-size: 14px; margin: 12px 0; }
+.kv dt { color: var(--ink-2); }
+.kv dd { margin: 0; }
+footer { color: var(--ink-2); font-size: 13px; margin-top: 56px; border-top: 1px solid var(--border); padding-top: 16px; }
+@media (max-width: 600px) { h1 { font-size: 24px; } .lead p { font-size: 16px; } }
+</style>
+</head>
+<body>
+<nav aria-label="Secciones"><div>
+  <a href="#resumen">Resumen</a><a href="#hallazgos">Lo que funciona</a><a href="#mapa">Mapa</a><a href="#corto">Corto plazo</a><a href="#largo">{{navNube}}</a><a href="#hoy">Hoy</a><a href="#ficha">Fichas</a><a href="#comun">{{navComun}}</a><a href="#metodo">Método</a><a href="#limites">Limitaciones</a>{{navOtro}}
+</div></nav>
+<main>
+  <h1>{{titulo}}</h1>
+  <p class="sub" id="sub"></p>
+
+  <section id="resumen" class="card lead">
+{{resumen}}
+  </section>
+
+  <h2 id="hallazgos">Lo que sí aguanta las pruebas</h2>
+  <p class="note">Solo los resultados que superan la corrección por comparaciones múltiples <i>y</i> la prueba conservadora de periodos independientes (marcados como <span class="chip solida">sólido</span>). El resto del informe muestra también los <span class="chip indicio">indicios</span>, que solo pasan la primera.</p>
+  <div class="grid2" id="hallazgosGrid"></div>
+
+  <h2 id="mapa">Mapa de todos los indicadores</h2>
+  <p class="note">Correlación de Spearman entre el valor del indicador y la rentabilidad posterior. Azul: a más valor, más subida. Rojo: a más valor, menos subida. La flecha indica qué espera la creencia popular. ● = resultado sólido; ○ = indicio. Pasa el ratón por cada celda para ver el intervalo de confianza y los p-valores. La valoración y la macro se publican una vez al mes y solo se analizan en mensual.</p>
+  <div class="tabs" id="tabsMapa" role="group" aria-label="Marco temporal del mapa"></div>
+  <div class="card scroll"><svg id="mapaSvg" role="img" aria-label="Mapa de calor de correlaciones por indicador y horizonte"></svg></div>
+
+  <h2 id="corto">A corto plazo: de 1 a 10 días</h2>
+  {{cortoTexto}}
+  <p class="note">Mismo análisis y mismas pruebas, pero con velas diarias frente a la rentabilidad de las 1, 5 y 10 velas siguientes. ● = sólido; ○ = indicio.</p>
+  <div class="card scroll"><svg id="cortoSvg" role="img" aria-label="Correlaciones a corto plazo"></svg></div>
+  <h3>¿Sigue funcionando hoy?</h3>
+  <p class="note">Una señal puede ser sólida sobre toda la historia y haberse apagado en los últimos años. Aquí está cada regla por épocas: % de veces que el precio estaba más alto al final del plazo, frente a la media de esa misma época. ● = diferencia significativa en esa época (binomial con casos separados, p &lt; 0,05). Con pocos casos por época, la mayoría de diferencias no llegan a serlo aunque existan.</p>
+  <div class="tabs" id="tabsEpocas" role="group" aria-label="Plazo de la tabla por épocas"></div>
+  <div class="card scroll" id="epocasTabla"></div>
+
+  <h2 id="largo">{{nubeTitulo}}</h2>
+  {{nubeTexto}}
+  <div class="tabs" id="tabsNube" role="group" aria-label="Indicador de la nube de puntos"></div>
+  <div class="card"><div class="scroll"><svg id="nubeSvg" role="img" aria-label="Valoración frente a rentabilidad real a 10 años"></svg></div>
+    <p class="note" id="nubeNota" style="margin-top:10px"></p>
+  </div>
+  <div class="card scroll" id="largoTabla"></div>
+
+  <h2 id="hoy">Dónde está cada indicador hoy</h2>
+  <p class="note">Valor al último dato disponible y su percentil frente a toda su historia anterior. Las dos columnas de la derecha dicen qué pasó después de los meses en que el indicador estaba en el mismo quintil que hoy. Es estadística descriptiva del pasado, no una predicción ni una recomendación.</p>
+  <div class="card scroll" id="hoyTabla"></div>
+
+  <h2 id="ficha">Ficha de cada indicador</h2>
+  <div class="ficha-cab">
+    <select id="selInd" aria-label="Indicador"></select>
+    <div class="tabs" id="tabsFicha" role="group" aria-label="Marco temporal de la ficha"></div>
+  </div>
+  <div class="card" id="fichaCab"></div>
+  <div class="card"><h3 style="margin-top:0">Historia del indicador (cierre mensual)</h3><div class="scroll"><svg id="serieSvg" role="img" aria-label="Serie histórica del indicador"></svg></div></div>
+  <div class="card">
+    <h3 style="margin-top:0">Qué pasó después de cada quintil</h3>
+    <p class="note">Puntos de diferencia entre el % de veces que {{sujeto}} subió partiendo de ese quintil y el % general. Q1 = el 20 % de valores más bajos <i>hasta ese momento</i>; Q5 = el 20 % más alto. La línea fina es el intervalo de confianza del 95 %.</p>
+    <div class="multiples" id="quintiles"></div>
+    <div class="legend"><span><i style="background:var(--pos)"></i>Subió más que la media</span><span><i style="background:var(--neg)"></i>Subió menos que la media</span><span>● sólido · ○ indicio</span></div>
+    <details><summary>Ver como tabla</summary><div class="scroll" id="quintilesTabla"></div></details>
+  </div>
+  <div class="card scroll" id="reglas"></div>
+  <div class="card scroll" id="mitades"></div>
+
+  <h2 id="comun">{{comunTitulo}}</h2>
+  {{comunTexto}}
+  <div class="card scroll"><svg id="comunSvg" role="img" aria-label="Correlaciones desde 1990"></svg></div>
+
+  <h2 id="metodo">Cómo está hecho</h2>
+  <h3>Datos</h3>
+  <ul>
+{{datos}}
+  </ul>
+  <h3>Sin mirar el futuro</h3>
+  <p>Cada dato se usa solo a partir de cuando se pudo conocer. Es el error más común en este tipo de análisis, y aquí se trata así:</p>
+  <div class="card scroll"><table>
+    <thead><tr><th class="l">Dato</th><th class="l">Cuándo se publica</th><th class="l">Desde cuándo se usa</th></tr></thead>
+    <tbody>
+{{retrasos}}
+    </tbody></table></div>
+  {{quintilesTexto}}
+  <h3>Medidas</h3>
+  <ul>
+    {{rentFutura}}
+    <li><b>Correlación de Spearman</b>: usa el orden de los valores y no su magnitud, así que no le afectan los valores extremos ni que la relación sea curva.</li>
+    <li><b>Zonas y reglas</b>: % de veces que {{sujeto}} estaba más alto al final del horizonte y rentabilidad media, comparados con la media del mismo periodo.</li>
+    <li><b>Eventos</b> (cruces, primera inversión de la curva, primera caída del 20 %…): cada uno se cuenta una vez. Para la prueba estadística solo valen los que están separados al menos un horizonte entre sí.</li>
+  </ul>
+  <h3>Pruebas estadísticas</h3>
+  <ul>
+    <li><b>Bootstrap por bloques circulares</b> con bloques del tamaño del horizonte: respeta que las rentabilidades a largo plazo se solapan (un mes y el siguiente comparten 119 de 120 meses a 10 años). Una fórmula clásica daría casi todo "significativo".</li>
+    <li><b>Corrección de Benjamini-Hochberg</b> por comparaciones múltiples, por separado para correlaciones, zonas y eventos. Con <span data-k="corrTotal"></span> correlaciones y <span data-k="zonasTotal"></span> zonas, un 5 % saldría significativo por azar.</li>
+    <li><b>Prueba conservadora</b>: repite el contraste contando solo los periodos que no se solapan (una prueba t con tantos grados de libertad como periodos independientes; en las zonas, una binomial exacta sobre observaciones separadas). Responde a la crítica de Boudoukh, Richardson y Whitelaw (2008) sobre la "predictibilidad a largo plazo".</li>
+    <li><b>Niveles</b>: <span class="chip solida">sólido</span> pasa la corrección por comparaciones múltiples y la prueba conservadora; <span class="chip indicio">indicio</span> solo la primera; el resto, sin evidencia.</li>
+    <li>Todo es reproducible: el bootstrap usa una semilla fija y el código está en <code>src/</code>, con pruebas automáticas en <code>src/pruebas.test.mjs</code>.</li>
+  </ul>
+  <div class="card scroll" id="pruebasTabla"></div>
+
+  <h2 id="limites">Limitaciones</h2>
+  <ul>
+{{limitaciones}}
+  </ul>
+
+  <h2>Siguiente paso</h2>
+  {{siguiente}}
+
+  <footer id="pie"></footer>
+</main>
+<div id="tip" role="tooltip"></div>
+
+<script>
+const R = /*DATOS*/null;
+const MARCOS = { diario: 'Diario', semanal: 'Semanal', mensual: 'Mensual' };
+const HZ = R.horizontes;
+const NS = 'http://www.w3.org/2000/svg';
+const $ = id => document.getElementById(id);
+const el = (tag, attrs = {}, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
+const txt = (parent, x, y, s, attrs = {}) => { const t = el('text', { x, y, ...attrs }, parent); t.textContent = s; return t; };
+const fix = (v, d) => { const s = v.toFixed(d); return +s === 0 ? (0).toFixed(d) : s; };
+const num = (v, d = 2) => v == null || !Number.isFinite(v) ? '—' : fix(v, d).replace('.', ',').replace('-', '−');
+const pct = (v, d = 0) => v == null ? '—' : num(v * 100, d) + ' %';
+const pts = v => v == null ? '—' : (v >= 0 ? '+' : '−') + Math.abs(v * 100).toFixed(1).replace('.', ',');
+const pv = p => p == null ? '—' : p < 0.001 ? '< 0,001' : num(p, 3);
+const fecha = d => new Date(d.slice(0, 10) + 'T00:00:00Z').toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+const mes = d => new Date(d.slice(0, 7) + '-15T00:00:00Z').toLocaleDateString('es-ES', { month: 'short', year: 'numeric', timeZone: 'UTC' });
+const marca = n => n === 'solida' ? '●' : n === 'indicio' ? '○' : '';
+const chip = n => `<span class="chip ${n || 'nada'}">${n === 'solida' ? 'sólido' : n === 'indicio' ? 'indicio' : 'sin evidencia'}</span>`;
+const IND = Object.fromEntries(R.indicadores.map(i => [i.id, i]));
+const conUnidad = (ind, v, d = 2) => v == null ? '—' : num(v, d) + (ind.unidad && ind.unidad.startsWith('%') ? ' %' : '');
+
+// ---------- Tooltip
+const tip = $('tip');
+function showTip(html, ev) { tip.innerHTML = html; tip.style.opacity = 1; moveTip(ev); }
+function moveTip(ev) { const w = tip.offsetWidth, h = tip.offsetHeight; let x = ev.clientX + 14, y = ev.clientY + 14; if (x + w > innerWidth - 8) x = ev.clientX - w - 14; if (y + h > innerHeight - 8) y = ev.clientY - h - 14; tip.style.left = Math.max(8, x) + 'px'; tip.style.top = Math.max(8, y) + 'px'; }
+function hideTip() { tip.style.opacity = 0; }
+function hover(node, html) { node.addEventListener('mouseenter', e => showTip(typeof html === 'function' ? html() : html, e)); node.addEventListener('mousemove', moveTip); node.addEventListener('mouseleave', hideTip); }
+function tabs(container, items, current, onChange) {
+  container.innerHTML = '';
+  for (const [k, label] of items) { const b = document.createElement('button'); b.textContent = label; b.setAttribute('aria-pressed', k === current); b.addEventListener('click', () => { for (const x of container.children) x.setAttribute('aria-pressed', x === b); onChange(k); }); container.appendChild(b); }
+}
+
+// ---------- Cifras del texto
+const P = R.pruebas;
+const K = {
+  corrTotal: P.correlaciones.total, corrSinCorregir: P.correlaciones.sinCorregir, corrAzar: Math.round(P.correlaciones.total * 0.05),
+  corrIndicio: P.correlaciones.indicio, corrSolida: P.correlaciones.solida, zonasTotal: P.zonas.total.toLocaleString('es-ES'),
+};
+document.querySelectorAll('[data-k]').forEach(n => { n.textContent = K[n.dataset.k]; });
+const hoyDe = (id, marco) => { const i = IND[id]; return (i.marcos[marco] || i.marcos.mensual || i.marcos.diario).hoy; };
+document.querySelectorAll('[data-pct]').forEach(n => { n.textContent = Math.round(hoyDe(n.dataset.pct, n.dataset.marco).percentil * 100); });
+document.querySelectorAll('[data-hoy]').forEach(n => { const v = hoyDe(n.dataset.hoy, n.dataset.marco).valor; n.textContent = num(n.dataset.abs ? Math.abs(v) : v, +(n.dataset.dec || 1)); });
+$('sub').textContent = R.textos.sub.replace('{fecha}', fecha(R.hasta)).replace('{n}', R.indicadores.length);
+$('pie').innerHTML = `Generado el ${fecha(R.generado)} · Datos: ${R.textos.fuentes} · Código y pruebas en el repositorio del proyecto · No es una recomendación de inversión.`;
+
+// ---------- Hallazgos sólidos (se construyen a partir de los resultados)
+(function hallazgos() {
+  const g = $('hallazgosGrid'), cards = [];
+  const H = id => HZ.find(h => h.id === id).etiqueta;
+  for (const ind of R.indicadores) for (const [tf, r] of Object.entries(ind.marcos)) for (const [h, a] of Object.entries(r.horizontes)) {
+    if (!a) continue;
+    if (a.nivel === 'solida') cards.push({ ind, tf, h, tipo: 'corr', a });
+    for (const z of [...a.quintiles, ...a.reglas]) if (z.nivel === 'solida') cards.push({ ind, tf, h, tipo: 'zona', a, z });
+  }
+  for (const [id, l] of Object.entries(R.largo)) for (const [h, a] of Object.entries(l.horizontes)) if (a && a.nivel === 'solida') cards.push({ ind: IND[id], tf: 'largo', h, tipo: 'corr', a });
+  cards.sort((a, b) => (a.tipo === b.tipo ? 0 : a.tipo === 'corr' ? -1 : 1));
+  const grupos = new Map();
+  for (const c of cards) { const k = [c.ind.id, c.h, c.tipo, c.z ? (c.z.nombre || 'Q' + c.z.q) : ''].join('|'); if (grupos.has(k)) grupos.get(k).otros.push(c.tf); else grupos.set(k, { ...c, otros: [] }); }
+  cards.length = 0; cards.push(...grupos.values());
+  const nombreZona = (ind, z) => z.nombre || (`Quintil ${z.q} (${z.q === 1 ? 'valores más bajos' : z.q === 5 ? 'valores más altos' : 'zona media'}, en torno a ${conUnidad(ind, z.valorMediano, 1)})`);
+  for (const c of cards) {
+    const d = document.createElement('div'); d.className = 'hallazgo';
+    const lista = [c.tf, ...c.otros].map(t => (t === 'largo' ? R.textos.largoEtiqueta : MARCOS[t].toLowerCase()));
+    const marco = lista.length > 1 ? lista.slice(0, -1).join(', ') + ' y ' + lista.at(-1) : lista[0];
+    if (c.tipo === 'corr') {
+      d.innerHTML = `<h3>${c.ind.nombre} · a ${H(c.h)}</h3><div class="cifra">ρ = ${num(c.a.spearman)}</div>
+        <p>Correlación ${c.a.spearman > 0 ? 'positiva' : 'negativa'} con la rentabilidad de los ${H(c.h)} siguientes (${marco}). ${Math.sign(c.a.spearman) === c.ind.sentidoPopular ? 'Va en la dirección que dice la teoría.' : 'Va en contra de la creencia popular.'}</p>
+        <p class="note">IC 95 %: ${num(c.a.ic[0])} a ${num(c.a.ic[1])} · ${c.a.indep} periodos independientes · p conservador ${pv(c.a.pCons)}</p>`;
+    } else {
+      const base = c.z.nombre ? c.a.base : c.a.baseQ;
+      d.innerHTML = `<h3>${c.ind.nombre} · a ${H(c.h)}</h3><div class="cifra">${pct(c.z.pctSubida)} <span style="font-size:15px;font-weight:400;color:var(--ink-2)">frente a ${pct(base)}</span></div>
+        <p>${nombreZona(c.ind, c.z)} (${marco}${c.otros.length ? '; cifras del ' + MARCOS[c.tf].toLowerCase() : ''}): ${R.textos.sujetoTexto} estaba más alto ${H(c.h)} después el ${pct(c.z.pctSubida)} de las veces, frente al ${pct(base)} habitual.</p>
+        <p class="note">${c.z.n.toLocaleString('es-ES')} observaciones, ${c.z.nIndep} independientes · diferencia ${pts(c.z.dif)} pts (IC ${pts(c.z.difIC[0])} a ${pts(c.z.difIC[1])})${c.ind.id === 'nfci' ? ' · Ojo: el NFCI se revisa cada semana (ver limitaciones).' : ''}${c.z.nIndep < 8 ? ` · Ojo: solo ${c.z.nIndep} episodios independientes.` : ''}</p>`;
+    }
+    g.appendChild(d);
+  }
+})();
+
+// ---------- Mapa de calor
+function colorRho(v, escala = 0.5) { const s = Math.min(1, Math.abs(v) / escala); return `color-mix(in oklab, var(${v >= 0 ? '--pos' : '--neg'}) ${Math.round(s * 100)}%, var(--mid))`; }
+function mapa(svg, filas, cols, getCell, opts = {}) {
+  svg.innerHTML = '';
+  const left = 320, cw = 92, ch = 34, top = 30, famH = 26;
+  let y = top; const pos = [];
+  let fam = null;
+  for (const f of filas) { if (f.familia !== fam) { fam = f.familia; pos.push({ fam, y }); y += famH; } pos.push({ f, y }); y += ch; }
+  const W = left + cw * cols.length + 8, H = y + 8;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('width', W); svg.style.maxWidth = 'none';
+  cols.forEach((h, j) => txt(svg, left + cw * j + cw / 2, 18, h.etiqueta, { 'text-anchor': 'middle' }));
+  for (const p of pos) {
+    if (p.fam) { txt(svg, 0, p.y + 18, p.fam, { class: 'fam' }); continue; }
+    const f = p.f;
+    txt(svg, 0, p.y + ch / 2 + 4, f.nombre.length > 42 ? f.nombre.slice(0, 41) + '…' : f.nombre, { class: 'val' });
+    txt(svg, left - 14, p.y + ch / 2 + 4, f.sentidoPopular > 0 ? '↗' : '↘', { 'text-anchor': 'middle' });
+    cols.forEach((h, j) => {
+      const a = getCell(f, h);
+      const g = el('g', {}, svg), x = left + cw * j;
+      if (!a) { el('rect', { x: x + 1, y: p.y + 1, width: cw - 2, height: ch - 2, rx: 4, style: 'fill: none; stroke: var(--grid)' }, g); return; }
+      el('rect', { x: x + 1, y: p.y + 1, width: cw - 2, height: ch - 2, rx: 4, style: `fill: ${colorRho(a.spearman)}` }, g);
+      txt(g, x + cw / 2, p.y + ch / 2 + 4, num(a.spearman), { 'text-anchor': 'middle', class: 'val' });
+      if (a.nivel && a.nivel !== 'nada') txt(g, x + cw - 9, p.y + 13, marca(a.nivel), { 'text-anchor': 'middle', class: 'val', style: 'font-size:11px' });
+      el('rect', { x, y: p.y, width: cw, height: ch, fill: 'transparent' }, g);
+      hover(g, () => `<b>${f.nombre} · ${h.etiqueta}</b>${opts.sub ? ' · ' + opts.sub : ''}<br>Spearman: ${num(a.spearman, 3)}${a.ic ? ` (IC 95 %: ${num(a.ic[0])} a ${num(a.ic[1])})` : ''}<br>p bootstrap ${pv(a.p)}${a.qv != null ? ` · q ${pv(a.qv)}` : ''}<br>p conservador ${pv(a.pCons)} (${a.indep} periodos independientes)<br>${a.n.toLocaleString('es-ES')} observaciones${a.desde ? ` desde ${mes(a.desde)}` : ''}<br>Nivel: ${a.nivel === 'solida' ? 'sólido' : a.nivel === 'indicio' ? 'indicio' : 'sin evidencia'}${f.sentidoPopular ? `<br>Creencia popular: ${f.sentidoPopular > 0 ? 'más valor, más subida' : 'más valor, menos subida'}` : ''}`);
+    });
+  }
+}
+let tfMapa = 'mensual';
+function pintarMapa() {
+  const filas = R.indicadores.filter(i => i.marcos[tfMapa]);
+  mapa($('mapaSvg'), filas, HZ, (f, h) => f.marcos[tfMapa].horizontes[h.id], { sub: MARCOS[tfMapa] });
+}
+tabs($('tabsMapa'), Object.entries(MARCOS), tfMapa, k => { tfMapa = k; pintarMapa(); });
+pintarMapa();
+
+// ---------- Desde 1990
+mapa($('comunSvg'), R.indicadores.filter(i => i.marcos.mensual?.comun), HZ.filter(h => !h.soloFamilia), (f, h) => f.marcos.mensual.comun[h.id], { sub: 'desde ' + R.comun.desde.slice(0, 4) });
+
+// ---------- Corto plazo
+if (R.corto) {
+  const C = R.corto, INDC = C.indicadores.filter(i => i.marcos.diario);
+  const KC = { corrTotal: C.pruebas.correlaciones.total, corrSolida: C.pruebas.correlaciones.solida, corrIndicio: C.pruebas.correlaciones.indicio };
+  document.querySelectorAll('[data-kc]').forEach(n => { n.textContent = KC[n.dataset.kc]; });
+  mapa($('cortoSvg'), INDC, C.horizontes, (f, h) => f.marcos.diario.horizontes[h.id], { sub: 'velas diarias' });
+  const E = R.epocas;
+  let hE = 0;
+  const pintarEpocas = () => {
+    let t = `<table><thead><tr><th>Regla</th>${E.epocas.map(e => `<th>${e}</th>`).join('')}</tr></thead><tbody>`;
+    for (const sen of E.senales) {
+      const hz = sen.horizontes[hE];
+      for (let k = 0; k < hz.porEpoca[0].reglas.length; k++) {
+        t += `<tr><td>${hz.porEpoca[0].reglas[k].nombre}</td>` + hz.porEpoca.map(e => {
+          const r = e.reglas[k];
+          if (!r.n) return '<td>—</td>';
+          return `<td title="${r.n} casos, ${r.nIndep} separados · p ${pv(r.p)} · mediana ${pct(r.mediana, 1)}">${pct(r.pctSubida)} <span class="note">(media ${pct(e.base)})</span> ${r.p != null && r.p < 0.05 ? '●' : ''}<br><span class="note">n = ${r.n}</span></td>`;
+        }).join('') + '</tr>';
+      }
+      t += `<tr><td class="note">Correlación de ${sen.nombre}</td>` + hz.porEpoca.map(e => `<td class="note">ρ = ${num(e.rho)}</td>`).join('') + '</tr>';
+    }
+    $('epocasTabla').innerHTML = t + '</tbody></table>';
+  };
+  tabs($('tabsEpocas'), E.horizontes.map((h, k) => [k, h]), 0, k => { hE = k; pintarEpocas(); });
+  pintarEpocas();
+} else { $('corto').style.display = 'none'; }
+
+// ---------- Nube de puntos: un indicador frente a la rentabilidad posterior
+// R.nube = { yTipo: 'pct' | 'mult', yEtiqueta, yCorto, unidad, agrupar: 'decada' | 'ano',
+//            variables: [{ id, nombre, xEtiqueta, hoy, ventana, dec, puntos: [[fecha, x, y]] }] }
+const NB = R.nube;
+let nubeVar = NB.variables[0].id;
+function pintarNube() {
+  const svg = $('nubeSvg'); svg.innerHTML = '';
+  const W = 960, H = 420, l = 64, r = 16, t = 16, b = 44, iw = W - l - r, ih = H - t - b;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.style.width = '100%'; svg.style.height = 'auto';
+  const V = NB.variables.find(v => v.id === nubeVar), mult = NB.yTipo === 'mult';
+  const pts_ = V.puntos.filter(p => p[1] != null && p[2] != null).map(p => ({ m: p[0], x: p[1], y: p[2] }));
+  const hoy = V.hoy;
+  const xs = pts_.map(p => p.x).concat(hoy), x0 = Math.floor(Math.min(...xs)), x1 = Math.ceil(Math.max(...xs));
+  // eje vertical: % lineal, o múltiplo en escala logarítmica (de ×0,125 a ×128)
+  const yv = v => (mult ? Math.log2(Math.max(v, 1 / 8)) : v);
+  const [y0, y1] = mult ? [-3, 7] : [Math.floor(Math.min(...pts_.map(p => p.y)) / 4) * 4, Math.ceil(Math.max(...pts_.map(p => p.y)) / 4) * 4];
+  const X = v => l + (v - x0) / (x1 - x0) * iw, Y = v => t + (1 - (Math.max(y0, Math.min(y1, yv(v))) - y0) / (y1 - y0)) * ih;
+  const fmtY = v => (mult ? '×' + num(v, v < 10 ? 2 : 0) : num(v, 1) + ' %');
+  const ticks = mult ? [-3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7].map(k => 2 ** k) : Array.from({ length: (y1 - y0) / 4 + 1 }, (_, k) => y0 + 4 * k);
+  for (const v of ticks) {
+    const yy = Y(v);
+    el('line', { x1: l, x2: W - r, y1: yy, y2: yy, style: `stroke: var(${(mult ? v === 1 : v === 0) ? '--axis' : '--grid'})` }, svg);
+    txt(svg, l - 8, yy + 4, mult ? '×' + (v < 1 ? num(v, v < 0.25 ? 3 : 2) : v) : (v > 0 ? '+' : '') + v + ' %', { 'text-anchor': 'end' });
+  }
+  const rango = x1 - x0, paso = rango > 30 ? 5 : rango > 12 ? 2 : rango > 4 ? 1 : 0.5;
+  for (let v = Math.ceil(x0 / paso) * paso; v <= x1 + 1e-9; v += paso) txt(svg, X(v), H - b + 18, num(v, paso < 1 ? 1 : 0), { 'text-anchor': 'middle' });
+  txt(svg, l + iw / 2, H - 6, V.xEtiqueta, { 'text-anchor': 'middle' });
+  const gp = el('g', {}, svg);
+  for (const p of pts_) el('circle', { cx: X(p.x), cy: Y(p.y), r: 2.6, style: 'fill: var(--dot); fill-opacity: .45' }, gp);
+  el('line', { x1: X(hoy), x2: X(hoy), y1: t, y2: t + ih, style: 'stroke: var(--hoy); stroke-width: 2' }, svg);
+  txt(svg, X(hoy) + (X(hoy) > W - 140 ? -6 : 6), t + 14, `Hoy: ${num(hoy, V.dec)}`, { 'text-anchor': X(hoy) > W - 140 ? 'end' : 'start', class: 'val' });
+  const ring = el('circle', { r: 6, style: 'fill: none; stroke: var(--ink); stroke-width: 2; opacity: 0' }, svg);
+  const hit = el('rect', { x: l, y: t, width: iw, height: ih, fill: 'transparent' }, svg);
+  hit.addEventListener('mousemove', ev => {
+    const bb = svg.getBoundingClientRect(), sx = (ev.clientX - bb.left) * W / bb.width, sy = (ev.clientY - bb.top) * H / bb.height;
+    let best = null, bd = Infinity; for (const p of pts_) { const d = (X(p.x) - sx) ** 2 + (Y(p.y) - sy) ** 2; if (d < bd) { bd = d; best = p; } }
+    if (!best || bd > 900) { ring.style.opacity = 0; hideTip(); return; }
+    ring.setAttribute('cx', X(best.x)); ring.setAttribute('cy', Y(best.y)); ring.style.opacity = 1;
+    showTip(`<b>${NB.agrupar === 'ano' ? fecha(best.m) : mes(best.m)}</b><br>${V.nombre}: ${num(best.x, V.dec)}<br>${NB.yEtiqueta}: ${fmtY(best.y)}`, ev);
+  });
+  hit.addEventListener('mouseleave', () => { ring.style.opacity = 0; hideTip(); });
+  // Qué pasó desde niveles parecidos al de hoy
+  const cerca = pts_.filter(p => Math.abs(p.x - hoy) <= V.ventana);
+  const sube = p => (mult ? p.y > 1 : p.y > 0);
+  const med = a => { const s = a.map(p => p.y).sort((x, y) => x - y); return s[Math.floor(s.length / 2)]; };
+  const gs = [...new Set(cerca.map(p => (NB.agrupar === 'decada' ? p.m.slice(0, 3) + '0' : p.m.slice(0, 4))))];
+  const grupos = { length: gs.length, join: () => (gs.length > 1 ? gs.slice(0, -1).join(', ') + ' y ' + gs.at(-1) : gs[0]) };
+  $('nubeNota').innerHTML = cerca.length
+    ? `En ${NB.articulo} ${cerca.length} ${NB.unidad} ${(V.frase || 'con ' + V.nombre + ' {rango}').replace('{rango}', 'entre ' + num(hoy - V.ventana, V.dec) + ' y ' + num(hoy + V.ventana, V.dec))} (${NB.agrupar === 'decada' ? 'de las décadas de' : 'de los años'} ${grupos.join(', ')}), ${NB.yCorto} fue positiva en ${cerca.filter(sube).length} y la mediana fue ${fmtY(med(cerca))}, frente a ${fmtY(med(pts_))} en general. ${grupos.length <= 3 ? 'Son muy pocos episodios distintos: tómalo como contexto, no como pronóstico.' : 'Los puntos vecinos comparten casi todo su periodo siguiente, así que hay bastantes menos casos independientes de los que parece.'}`
+    : 'No hay ningún momento en la historia con un nivel parecido al de hoy que ya tenga el periodo siguiente completo.';
+}
+tabs($('tabsNube'), NB.variables.map(v => [v.id, v.nombre]), nubeVar, k => { nubeVar = k; pintarNube(); });
+pintarNube();
+(function tablaLarga() {
+  if (!Object.keys(R.largo || {}).length) { $('largoTabla').style.display = 'none'; return; }
+  let h = '<table><thead><tr><th>Historia larga (1881-2026), rentabilidad total real</th>' + HZ.map(x => `<th>${x.etiqueta}</th>`).join('') + '</tr></thead><tbody>';
+  for (const [id, l] of Object.entries(R.largo)) h += `<tr><td>${IND[id].nombre} <span class="note">desde ${l.desde.slice(0, 4)}</span></td>` + HZ.map(x => { const a = l.horizontes[x.id]; return `<td>${a ? num(a.spearman) + ' ' + marca(a.nivel) : '—'}</td>`; }).join('') + '</tr>';
+  $('largoTabla').innerHTML = h + '</tbody></table><p class="note" style="margin-top:8px">Correlación de Spearman. ● sólido · ○ indicio.</p>';
+})();
+
+// ---------- Hoy
+(function hoy() {
+  const HH = R.textos.hoyHorizontes || ['12m', '5a'];
+  let h = `<table><thead><tr><th>Indicador</th><th class="l">Marco</th><th>Valor</th><th>Percentil histórico</th><th>Quintil</th><th>Desde ese quintil, a ${HZ.find(x => x.id === HH[0]).etiqueta} subió…</th><th>…y a ${HZ.find(x => x.id === HH[1]).etiqueta}</th></tr></thead><tbody>`;
+  let fam = null;
+  for (const ind of R.indicadores) {
+    const tf = ind.marcos.diario ? 'diario' : 'mensual', r = ind.marcos[tf]; if (!r) continue;
+    if (ind.familia !== fam) { fam = ind.familia; h += `<tr><th colspan="7" class="l" style="padding-top:14px">${fam}</th></tr>`; }
+    const q = r.hoy.quintil;
+    const celda = hz => { const a = r.horizontes[hz]; if (!a || !q) return '—'; const z = a.quintiles[q - 1]; if (!z || !z.n) return '—'; return `${pct(z.pctSubida)} <span class="note">(media ${pct(a.baseQ)})</span> ${marca(z.nivel)}`; };
+    h += `<tr><td>${ind.nombre}</td><td class="l">${MARCOS[tf]}</td><td>${conUnidad(ind, r.hoy.valor, 2)}</td><td>${r.hoy.percentil == null ? '—' : pct(r.hoy.percentil)}</td><td>${q ? 'Q' + q : '—'}</td><td>${celda(HH[0])}</td><td>${celda(HH[1])}</td></tr>`;
+  }
+  $('hoyTabla').innerHTML = h + `</tbody></table><p class="note" style="margin-top:8px">Datos al ${fecha(IND.rsi.marcos.diario.hoy.fecha)}. Los técnicos y el VIX se miran en velas diarias, como se usan normalmente; la valoración y la macro, con el último dato publicado. ● sólido · ○ indicio; sin marca, la diferencia puede ser ruido.</p>`;
+})();
+
+// ---------- Fichas
+const sel = $('selInd');
+let fam2 = null, og = null;
+for (const ind of R.indicadores) { if (ind.familia !== fam2) { fam2 = ind.familia; og = document.createElement('optgroup'); og.label = fam2; sel.appendChild(og); } const o = document.createElement('option'); o.value = ind.id; o.textContent = ind.nombre; og.appendChild(o); }
+// la ficha abre el primer indicador con alguna correlación sólida
+const conSolida = R.indicadores.find(i => Object.values(i.marcos).some(m => Object.values(m.horizontes).some(a => a && a.nivel === 'solida'))) || R.indicadores[0];
+let fichaId = conSolida.id, fichaTf = Object.keys(conSolida.marcos).find(k => Object.values(conSolida.marcos[k].horizontes).some(a => a && a.nivel === 'solida')) || Object.keys(conSolida.marcos)[0];
+sel.value = fichaId;
+sel.addEventListener('change', () => { fichaId = sel.value; if (!IND[fichaId].marcos[fichaTf]) fichaTf = 'mensual'; pintarFicha(); });
+function pintarFicha() {
+  const ind = IND[fichaId];
+  tabs($('tabsFicha'), Object.entries(MARCOS).filter(([k]) => ind.marcos[k]), fichaTf, k => { fichaTf = k; pintarFicha(); });
+  const r = ind.marcos[fichaTf];
+  const cnt = { solida: 0, indicio: 0 }; for (const m of Object.values(ind.marcos)) for (const a of Object.values(m.horizontes)) if (a && cnt[a.nivel] != null) cnt[a.nivel]++;
+  $('fichaCab').innerHTML = `<h3 style="margin-top:0">${ind.nombre} <span class="note">· ${ind.familia}</span></h3>
+    <p>${ind.que}</p><p><b>La creencia popular:</b> ${ind.popular}</p>
+    <dl class="kv"><dt>Datos desde</dt><dd>${fecha(r.desde)}</dd><dt>Valor hoy</dt><dd>${conUnidad(ind, r.hoy.valor)} · percentil ${r.hoy.percentil == null ? '—' : pct(r.hoy.percentil)} · quintil ${r.hoy.quintil ?? '—'}</dd>
+    <dt>Correlaciones con evidencia</dt><dd>${cnt.solida} ${cnt.solida === 1 ? 'sólida' : 'sólidas'} y ${cnt.indicio} ${cnt.indicio === 1 ? 'indicio' : 'indicios'}, de ${Object.values(ind.marcos).reduce((s, m) => s + Object.values(m.horizontes).filter(Boolean).length, 0)} (todos los marcos y horizontes)</dd></dl>`;
+  pintarSerie(ind);
+  pintarQuintiles(ind, r);
+  pintarReglas(ind, r);
+  let h = '<table><thead><tr><th>Correlación por mitades de su historia</th>' + Object.values(r.horizontes).filter(Boolean).map((a, k) => `<th>${HZ.find(x => r.horizontes[x.id] === a).etiqueta}</th>`).join('') + '</tr></thead><tbody>';
+  for (const k of [0, 1]) { const ref = Object.values(r.horizontes).find(Boolean).mitades[k]; h += `<tr><td>${mes(ref.desde)} – ${mes(ref.hasta)}</td>` + Object.values(r.horizontes).filter(Boolean).map(a => `<td>${num(a.mitades[k].rho)}</td>`).join('') + '</tr>'; }
+  $('mitades').innerHTML = h + '</tbody></table><p class="note" style="margin-top:8px">Si una relación es real debería aparecer en las dos mitades con el mismo signo. Las fechas de corte varían un poco según el horizonte; se muestran las del primero.</p>';
+}
+function pintarSerie(ind) {
+  const svg = $('serieSvg'); svg.innerHTML = '';
+  const s = (ind.marcos.mensual || {}).serie;
+  if (!s) { svg.setAttribute('viewBox', '0 0 10 10'); return; }
+  const datos = s.filter(p => p[1] != null);
+  const W = 960, H = 260, l = 56, r = 16, t = 12, b = 30, iw = W - l - r, ih = H - t - b;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.style.width = '100%'; svg.style.height = 'auto';
+  const tx = m => +m.slice(0, 4) + (+m.slice(5, 7) - 1) / 12;
+  const xa = tx(datos[0][0]), xb = tx(datos.at(-1)[0]);
+  const vals = datos.map(p => p[1]); let lo = Math.min(...vals), hi = Math.max(...vals); const pad = (hi - lo) * 0.05; lo -= pad; hi += pad;
+  const X = v => l + (v - xa) / (xb - xa) * iw, Y = v => t + (1 - (v - lo) / (hi - lo)) * ih;
+  const ticks = 5; for (let k = 0; k <= ticks; k++) { const v = lo + (hi - lo) * k / ticks; el('line', { x1: l, x2: W - r, y1: Y(v), y2: Y(v), style: 'stroke: var(--grid)' }, svg); txt(svg, l - 8, Y(v) + 4, num(v, Math.abs(hi - lo) < 5 ? 2 : Math.abs(hi - lo) < 50 ? 1 : 0), { 'text-anchor': 'end' }); }
+  if (lo < 0 && hi > 0) el('line', { x1: l, x2: W - r, y1: Y(0), y2: Y(0), style: 'stroke: var(--axis)' }, svg);
+  const paso = (xb - xa) > 60 ? 10 : 5;
+  for (let y = Math.ceil(xa / paso) * paso; y <= xb; y += paso) txt(svg, X(y), H - 8, String(y), { 'text-anchor': 'middle' });
+  let d = ''; for (const p of datos) d += (d ? 'L' : 'M') + X(tx(p[0])).toFixed(1) + ',' + Y(p[1]).toFixed(1);
+  el('path', { d, style: 'fill: none; stroke: var(--pos); stroke-width: 2; stroke-linejoin: round' }, svg);
+  const cross = el('line', { y1: t, y2: t + ih, style: 'stroke: var(--axis); opacity: 0' }, svg);
+  const dot = el('circle', { r: 4, style: 'fill: var(--pos); stroke: var(--surface); stroke-width: 2; opacity: 0' }, svg);
+  const hit = el('rect', { x: l, y: t, width: iw, height: ih, fill: 'transparent' }, svg);
+  hit.addEventListener('mousemove', ev => {
+    const bb = svg.getBoundingClientRect(), sx = (ev.clientX - bb.left) * W / bb.width, v = xa + (sx - l) / iw * (xb - xa);
+    let best = datos[0]; for (const p of datos) if (Math.abs(tx(p[0]) - v) < Math.abs(tx(best[0]) - v)) best = p;
+    cross.setAttribute('x1', X(tx(best[0]))); cross.setAttribute('x2', X(tx(best[0]))); cross.style.opacity = 1;
+    dot.setAttribute('cx', X(tx(best[0]))); dot.setAttribute('cy', Y(best[1])); dot.style.opacity = 1;
+    showTip(`<b>${mes(best[0])}</b><br>${ind.nombre}: ${conUnidad(ind, best[1])}`, ev);
+  });
+  hit.addEventListener('mouseleave', () => { cross.style.opacity = 0; dot.style.opacity = 0; hideTip(); });
+}
+function barra(svg, cx, y0, y1, w, positivo) {
+  const top = Math.min(y0, y1), h = Math.max(1, Math.abs(y1 - y0)), rr = Math.min(4, h), x0 = cx - w / 2;
+  const d = positivo
+    ? `M${x0},${y0} V${top + rr} Q${x0},${top} ${x0 + rr},${top} H${x0 + w - rr} Q${x0 + w},${top} ${x0 + w},${top + rr} V${y0} Z`
+    : `M${x0},${y0} V${top + h - rr} Q${x0},${top + h} ${x0 + rr},${top + h} H${x0 + w - rr} Q${x0 + w},${top + h} ${x0 + w},${top + h - rr} V${y0} Z`;
+  return el('path', { d, style: `fill: var(${positivo ? '--pos' : '--neg'})` }, svg);
+}
+function pintarQuintiles(ind, r) {
+  const box = $('quintiles'); box.innerHTML = '';
+  const W = 300, H = 236, l = 44, rr = 8, t = 30, bt = 40, iw = W - l - rr, ih = H - t - bt;
+  let tabla = '<table><thead><tr><th>Horizonte</th><th>Quintil</th><th>Valor típico</th><th>Obs.</th><th>Indep.</th><th>% subidas</th><th>Media</th><th>Diferencia</th><th>IC 95 %</th><th>Rent. media</th><th>Nivel</th></tr></thead><tbody>';
+  for (const hz of HZ) {
+    const a = r.horizontes[hz.id]; if (!a) continue;
+    const lim = Math.max(0.15, ...a.quintiles.filter(q => q.n && q.difIC).map(q => Math.max(Math.abs(q.difIC[0]), Math.abs(q.difIC[1])))) ;
+    const L = Math.ceil(lim * 20) / 20;
+    const Y = v => t + ih / 2 - Math.max(-L, Math.min(L, v)) / L * (ih / 2);
+    const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `Quintiles a ${hz.etiqueta}` });
+    svg.style.width = '100%'; svg.style.height = 'auto';
+    txt(svg, 0, 14, `A ${hz.etiqueta} · media ${pct(a.baseQ)} de subidas`, { class: 'title' });
+    for (const g of [-L, -L / 2, 0, L / 2, L]) { el('line', { x1: l, x2: W - rr, y1: Y(g), y2: Y(g), style: `stroke: var(${g === 0 ? '--axis' : '--grid'})` }, svg); txt(svg, l - 6, Y(g) + 4, g === 0 ? '0' : pts(g), { 'text-anchor': 'end' }); }
+    const bw = iw / 5;
+    a.quintiles.forEach((z, k) => {
+      const cx = l + bw * k + bw / 2;
+      txt(svg, cx, H - bt + 16, 'Q' + z.q, { 'text-anchor': 'middle' });
+      if (!z.n) return;
+      txt(svg, cx, H - bt + 30, '≈ ' + num(z.valorMediano, Math.abs(z.valorMediano) < 10 ? 1 : 0), { 'text-anchor': 'middle', style: 'font-size:10.5px' });
+      const g = el('g', {}, svg);
+      el('rect', { x: l + bw * k, y: t, width: bw, height: ih, fill: 'transparent' }, g);
+      barra(g, cx, Y(0), Y(z.dif), Math.min(30, bw - 12), z.dif >= 0);
+      if (z.difIC) { const y1 = Y(z.difIC[0]), y2 = Y(z.difIC[1]); el('line', { x1: cx, x2: cx, y1, y2, style: 'stroke: var(--ink-2); stroke-width: 1.5' }, g); for (const yy of [y1, y2]) el('line', { x1: cx - 4, x2: cx + 4, y1: yy, y2: yy, style: 'stroke: var(--ink-2); stroke-width: 1.5' }, g); }
+      if (z.nivel && z.nivel !== 'nada') txt(g, cx, t - 4, marca(z.nivel), { 'text-anchor': 'middle', class: 'val' });
+      hover(g, `<b>Q${z.q} · a ${hz.etiqueta}</b><br>Valores típicos: ${conUnidad(ind, z.valorMediano)} (de ${conUnidad(ind, z.valorMin)} a ${conUnidad(ind, z.valorMax)})<br>Subió el ${pct(z.pctSubida, 1)} de las veces (media ${pct(a.baseQ, 1)})<br>Diferencia: ${pts(z.dif)} pts${z.difIC ? ` [${pts(z.difIC[0])}, ${pts(z.difIC[1])}]` : ''}<br>Rentabilidad media: ${pct(z.media, 1)} (media general ${pct(a.baseQmedia, 1)})<br>${z.n.toLocaleString('es-ES')} observaciones, ${z.nIndep} independientes<br>p bootstrap ${pv(z.p)} · p binomial ${pv(z.pBinom)}`);
+      tabla += `<tr><td>${hz.etiqueta}</td><td>Q${z.q}</td><td>${conUnidad(ind, z.valorMediano)}</td><td>${z.n.toLocaleString('es-ES')}</td><td>${z.nIndep}</td><td>${pct(z.pctSubida, 1)}</td><td>${pct(a.baseQ, 1)}</td><td>${pts(z.dif)}</td><td>${z.difIC ? pts(z.difIC[0]) + ' a ' + pts(z.difIC[1]) : '—'}</td><td>${pct(z.media, 1)}</td><td>${chip(z.nivel)}</td></tr>`;
+    });
+    box.appendChild(svg);
+  }
+  $('quintilesTabla').innerHTML = tabla + '</tbody></table>';
+}
+function pintarReglas(ind, r) {
+  const hs = HZ.filter(h => r.horizontes[h.id]);
+  const reglas = (R.catalogo.find(c => c.id === ind.id) || { reglas: [] }).reglas;
+  if (!reglas.length) { $('reglas').innerHTML = '<h3 style="margin-top:0">Reglas populares</h3><p class="note">Este indicador no tiene un umbral popular fijo: se analiza solo por quintiles.</p>'; return; }
+  let h = `<h3 style="margin-top:0">Reglas populares</h3><p class="note">% de veces que el índice estaba más alto al final del horizonte, y entre paréntesis la diferencia con la media en puntos. En los eventos, cada cruce o primer toque cuenta una vez.</p><table><thead><tr><th>Regla</th>${hs.map(x => `<th>${x.etiqueta}</th>`).join('')}</tr></thead><tbody>`;
+  let listas = '';
+  for (const rg of reglas) {
+    h += `<tr><td>${rg.nombre} <span class="note">${rg.tipo === 'evento' ? '(evento)' : ''}</span></td>`;
+    for (const x of hs) {
+      const a = r.horizontes[x.id], g = a.reglas.find(q => q.id === rg.id);
+      if (!g || !g.n) { h += '<td>—</td>'; continue; }
+      const dif = g.pctSubida - a.base;
+      h += `<td title="${g.n} ${g.tipo === 'evento' ? 'eventos' : 'observaciones'}, ${g.nIndep} independientes · p ${pv(g.p)}">${pct(g.pctSubida)} <span class="note">(${pts(dif)})</span> ${marca(g.nivel)}<br><span class="note">n = ${g.n}${g.tipo === 'evento' ? '' : ` · ${g.episodios} ep.`}</span></td>`;
+    }
+    h += '</tr>';
+    const conLista = r.horizontes[hs.find(x => x.id === '12m') ? '12m' : hs[0].id].reglas.find(q => q.id === rg.id);
+    if (rg.tipo === 'evento' && conLista && conLista.lista && conLista.lista.length) {
+      listas += `<details><summary>${rg.nombre}: los ${conLista.lista.length} casos (rentabilidad a 12 meses)</summary><table><thead><tr><th>Fecha</th><th>Valor</th><th>12 meses después</th></tr></thead><tbody>` +
+        conLista.lista.map(e => `<tr><td>${fecha(e.fecha)}</td><td>${conUnidad(ind, e.valor)}</td><td>${pct(e.ret, 1)}</td></tr>`).join('') + '</tbody></table></details>';
+    }
+  }
+  $('reglas').innerHTML = h + `</tbody></table><p class="note" style="margin-top:8px">Media de referencia en cada horizonte: ${hs.map(x => `${x.etiqueta} ${pct(r.horizontes[x.id].base)}`).join(' · ')}. ● sólido · ○ indicio.</p>` + listas;
+}
+pintarFicha();
+
+// ---------- Tabla de pruebas
+(function () {
+  const filas = [['Correlaciones', P.correlaciones], ['Zonas y estados', P.zonas], ['Eventos', P.eventos], ['Periodo común desde ' + R.comun.desde.slice(0, 4), P.comun]];
+  $('pruebasTabla').innerHTML = '<table><thead><tr><th>Tipo de prueba</th><th>Pruebas</th><th>p < 0,05 sin corregir</th><th>Esperables por azar</th><th>Tras corregir (indicio o más)</th><th>Sólidas</th></tr></thead><tbody>' +
+    filas.map(([n, x]) => `<tr><td>${n}</td><td>${x.total.toLocaleString('es-ES')}</td><td>${x.sinCorregir}</td><td>${Math.round(x.total * 0.05)}</td><td>${x.indicio}</td><td>${x.solida}</td></tr>`).join('') + '</tbody></table>';
+})();
+</script>
+</body>
+</html>
