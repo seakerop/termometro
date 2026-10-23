@@ -1,0 +1,33 @@
+name: actualizar datos
+
+# Cada mes descarga los datos nuevos, repite el análisis y regenera los informes de docs/.
+# El día 3 para que FRED y Shiller hayan publicado ya el mes anterior.
+on:
+  schedule:
+    - cron: '0 6 3 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run todo
+      - name: Guardar los informes si han cambiado
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs
+          git diff --cached --quiet && exit 0
+          git commit -m "Datos actualizados a $(date -u +%Y-%m-%d)"
+          git push
